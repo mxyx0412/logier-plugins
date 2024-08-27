@@ -5,7 +5,7 @@ export class TextMsg extends plugin {
     constructor() {
         super({
             name: '[鸢尾花插件]表情包小偷',
-            dsc: '表情包小偷',            
+            dsc: '表情包小偷',
             event: 'message',
             priority: 9999,
             rule: [
@@ -15,18 +15,18 @@ export class TextMsg extends plugin {
                     log: false
                 },
             ]
-        })    
+        })
     }
-    get appconfig () {
+    get appconfig() {
         return setting.getConfig("EmojiThief");
     }
 
-    async 表情包小偷(e) { 
-        
+    async 表情包小偷(e) {
+
         let rate = this.appconfig.DefalutReplyRate; // 默认概率
         let EmojiRate = this.appconfig.DefalutEmojiRate
         let groupMatched = false;
-        
+
         if (this.appconfig.ETGroupRate && this.appconfig.ETGroupRate.length > 0) {
             for (let config of this.appconfig.ETGroupRate) {
                 if (config.groupList.includes(e.group_id)) {
@@ -37,10 +37,10 @@ export class TextMsg extends plugin {
                 }
             }
             if (!groupMatched) return false; // 如果数组不为空且匹配不上，就拒绝
-        } 
-        
+        }
+
         let key = `Yunzai:EmojiThief:${e.group_id}_EmojiThief`;
-        
+
         e.message.forEach(async item => {
             if (item.asface) {
                 try {
@@ -58,28 +58,28 @@ export class TextMsg extends plugin {
                     logger.error(`[表情包小偷]Redis数据库出错: ${error}`);
                 }
             }
-        })  
+        })
 
-        if (Math.random() < rate) {
+        if ((Math.random() * 100) < rate) {
             try {
                 let emojiUrl = await getemoji(e, this.appconfig.ETEmojihubCategory);
                 let listStr = await redis.get(key);
                 if (listStr && Math.random() >= Number(EmojiRate)) {
-                    let list = JSON.parse(listStr);    
+                    let list = JSON.parse(listStr);
                     if (Array.isArray(list) && list.length) {
                         let randomIndex = Math.floor(Math.random() * list.length);
                         emojiUrl = list[randomIndex];
                     }
                 }
-                logger.info(`[鸢尾花插件] 发送表情包: ${emojiUrl}`)  
-        
+                logger.info(`[鸢尾花插件] 发送表情包: ${emojiUrl}`)
+
                 e.reply([segment.image(emojiUrl)]);
 
             } catch (error) {
                 logger.error(`[表情包小偷]表情包发送失败: ${error}`);
             }
         }
-        
+
         return false;
     }
 }

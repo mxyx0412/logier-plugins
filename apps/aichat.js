@@ -4,14 +4,13 @@ import setting from "../model/setting.js";
 export class greetings extends plugin {
     constructor() {
         super({
-            name: "[鸢尾花插件]潜伏gpt",
+            name: "[鸢尾花插件]ai对话",
             event: "message",
             priority: 5001,
             rule: [
                 {
-                    reg: '^(?![\\s#/[\\]])',
-                    fnc: '潜伏',
-                    log: false
+                    reg: '^#(ai|AI|Ai)',
+                    fnc: '回答',
                 },
             ]
         });
@@ -25,18 +24,13 @@ export class greetings extends plugin {
         return setting.getConfig("GPTconfig");
     }
 
-    async 潜伏(e) {
+    async 回答(e) {
 
         if (!this.GPTconfig.GPTKey) {
             return false;
         }
 
         if (!e.msg) {
-            return false;
-        }
-        var random = Math.random() * 100;
-        logger.info("[潜伏]", random, Number(this.appconfig.CustomizeRate));
-        if (random > Number(this.appconfig.CustomizeRate)) {
             return false;
         }
 
@@ -47,7 +41,7 @@ export class greetings extends plugin {
         const content = await gpt(gptmsg);
 
         if (content == true) {
-            logger.info('[潜伏]key或url配置错误，');
+            logger.info('[ai回答]key或url配置错误，');
             return false;
         }
 
@@ -65,7 +59,7 @@ export class greetings extends plugin {
 
         for (let index = 0; index < sentences.length; index++) {
             if (index === 0) {
-                await new Promise(resolve => setTimeout(resolve, Math.random() * (5000 - 3000)));
+                await new Promise(resolve => setTimeout(resolve, Math.random() * (10000 - 3000)));
                 e.reply(sentences[index], true);
             } else {
                 await new Promise(resolve => setTimeout(resolve, Math.random() * (5000 - 3000)));
